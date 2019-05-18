@@ -1,0 +1,38 @@
+//2.0
+[{
+  "channel": "online",
+  "contentLanguage": "en",
+  "offerId": "g002",
+  "targetCountry": "ZA",
+  "brand": "samsung",
+  "title": "Samsung A30",
+  "link": "www.google.com",
+  "imageLink": "https://bloximages.chicago2.vip.townnews.com/tribdem.com/content/tncms/assets/v3/editorial/3/83/38384be2-3ba5-11e8-adec-bf48bc62810f/5acadc92f3c7d.image.jpg?resize=400%2C357",
+  "price": {
+    "currency": "ZAR",
+    "value": "4499"
+  },
+  "destinations": [
+    {
+      "destinationName": "Shopping ads",
+      "intention": "optional"
+    }
+  ]
+},
+//2.1
+{
+  "channel": "online",
+  "contentLanguage": "en",
+  "offerId": "g002",
+  "targetCountry": "ZA",
+  "brand": "samsung",
+  "title": "Samsung A30",
+  "link": "www.google.com",
+  "imageLink": "https://bloximages.chicago2.vip.townnews.com/tribdem.com/content/tncms/assets/v3/editorial/3/83/38384be2-3ba5-11e8-adec-bf48bc62810f/5acadc92f3c7d.image.jpg?resize=400%2C357",
+  "price": {
+    "currency": "ZAR",
+    "value": "4499"
+  },
+  "availability": "true"
+}]
+

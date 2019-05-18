@@ -1,0 +1,23 @@
+{
+  "name": "google-shopping",
+  "version": "1.0.0",
+  "description": "Google Shopping API test",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gntimba/google-shopping.git"
+  },
+  "author": "gntimba@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gntimba/google-shopping/issues"
+  },
+  "homepage": "https://github.com/gntimba/google-shopping#readme",
+  "dependencies": {
+    "express": "^4.16.4",
+    "googleapis": "^39.2.0"
+  }
+}
