@@ -18,6 +18,8 @@
   "homepage": "https://github.com/gntimba/google-shopping#readme",
   "dependencies": {
     "express": "^4.16.4",
-    "googleapis": "^39.2.0"
+    "fast-csv": "^2.5.0",
+    "googleapis": "^39.2.0",
+    "read-excel-file": "^3.0.1"
   }
 }

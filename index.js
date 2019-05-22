@@ -1,7 +1,9 @@
 const express = require('express')
 const { google } = require('googleapis')
+const readXlsxFile = require('read-excel-file/node');
+var fs = require('fs');
 const path = require('path');
-const serviceAccountJwt = require('./Shopping API-145f77376c3c.json')
+//const serviceAccountJwt = require('./Shopping API-145f77376c3c.json')
 const app = express()
 
 app.get('/', function (req, res) {
@@ -23,6 +25,15 @@ app.get('/', function (req, res) {
   }
 
   runSample().catch(console.error)
+})
+
+app.get('/csv',function(req,res){
+
+  readXlsxFile(fs.createReadStream('test.xlsx')).then((rows) => {
+    res.send(rows)
+  })
+
+
 })
 
 app.get('/insert', function (req, res) {
