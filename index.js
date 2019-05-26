@@ -55,6 +55,7 @@ app.get('/insert', function (req, res) {
         link: "https://www.samsung.com/za/smartphones/galaxy-a30-a305/SM-A305FZBEXFA/",
         description:"The best in samsung",
         imageLink: "https://i.gadgets360cdn.com/large/samsung_galaxy_a30_a50_fronts_1551359465736.jpg",
+        mpn:"44444",
         price: {
           currency: "ZAR",
           value: "4499"
