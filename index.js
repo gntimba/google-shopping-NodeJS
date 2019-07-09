@@ -1,15 +1,17 @@
 const express = require('express')
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const { google } = require('googleapis')
 const path = require('path');
 //const serviceAccountJwt = require('./Shopping API-145f77376c3c.json')
 const app = express()
+const axios = require('axios');
 var parseString = require('xml2js').parseString;
-var request = require('request');
+const pro=require('../google-shopping/products.json')
 
 app.get('/', function (req, res) {
   async function runSample() {
     const client = await google.auth.getClient({
-      keyFile: path.join(__dirname, 'Shopping API-145f77376c3c.json'),
+      keyFile: path.join(__dirname, 'Shopping API-8bd0b5bf1bca.json'),
       scopes: 'https://www.googleapis.com/auth/content',
     });
 
@@ -28,66 +30,93 @@ app.get('/', function (req, res) {
 })
 
 app.get('/csv', function (req, res) {
-  let vm = this;
-  var hrstart = process.hrtime()
-  var options = {
-    url:  'https://www.buynow.co.za/Export.aspx?key=3',
-    timeout: 120000
+
+  function axiosTest() {
+    console.log('geting data from the server')
+    var options=
+      {
+        method: 'get',
+        url: 'http://www.buynow.co.za/Export.aspx?key=3',
+        timeout: 180000, // Let's say you want to wait at least 180 seconds
+      }
+    
+    return axios(options).then(response => {
+      // returning the data here allows the caller to get it through another .then(...)
+      //console.log(response.data)
+      console.log('done geting data')
+      return response.data
+    })
   }
-  request(options, function (error, response, body) {
 
-     console.log('error:', error); // Print the error if one occurred
-    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    //console.log('body:', body); // Print the HTML for the Google homepage.
-    parseString(body, function (err, result) {
-      let products = result.ROOT.Products;
-      let entries = { entries: [] }
-
-      for (let index = 0; index < products.length; index++) {
-        const params = {
-          merchantId: "120407712",
-          batchId: index+1,
-          method: "insert",
-          product: {
-            channel: "online",
-            contentLanguage: "en",
-            offerId: products[index].ProductCode[0],
-            id:products[index].ProductCode[0],
-            targetCountry: "ZA",
-            brand: products[index].Brand[0],
-            title: products[index].ProductName[0],
-            link: products[index].ProductURL[0],
-            description: products[index].ProductDescription[0],
-            imageLink: products[index].ImageURL[0],
-            product_type: products[index].Category1[0],
-            price: {
-              currency: "ZAR",
-              value: products[index].Price[0]
-            },
-            availability: products[index].StockLevel[0]
-          }
-        };
-        if(products[index].hasOwnProperty('OnSpecial')){
-          params.product.salePrice= {
-            "value": products[index].SpecialPrice[0],
-            "currency": 'ZAR'
-          }
-          //console.log(index)
-      }
-        entries.entries.push(params)
-      }
+ async function insertBatch(data){
+    try {
+      const client = await google.auth.getClient({
+        keyFile: path.join(__dirname, 'Shopping API-8bd0b5bf1bca.json'),
+        scopes: 'https://www.googleapis.com/auth/content',
+      });
+      console.log("now inserting to google mecharnt")
+      const content = google.content({ version: 'v2.1', auth: client });
+      const response = await content.products.custombatch({"resource":data})
+      //console.log(response.data);
+      res.json(response.data)
       hrend = process.hrtime(hrstart)
-
-    
       console.info('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
+      return response.data;
+    } catch (error) {
+      console.log(error)
+    }
+  
+ }
+ var hrstart = process.hrtime()
     
-      // if(products[index].ProductCode[0])
-      res.json(entries)
-    });
+    axiosTest().then(data => {
+      // res.send(data)
+      console.log('done now passing data and converting it')
+      parseString(data, function (err, result) {
+        let products = result.ROOT.Products;
+        let entries = { entries: [] }
 
-  });
+        for (let index = 0; index < products.length; index++) {
+          const params = {
+            merchantId: 120407712,
+            batchId: index + 1,
+            method: "insert",
+            product: {
+              channel: "online",
+              contentLanguage: "en",
+              offerId: products[index].ProductCode[0],
+              targetCountry: "ZA",
+              brand: products[index].Brand[0],
+              title: products[index].ProductName[0].replace(/<\/?[^>]+(>|$)/g, ""),
+              link: products[index].ProductURL[0],
+              description: products[index].ProductDescription[0].replace(/<\/?[^>]+(>|$)/g, ""),
+              imageLink: products[index].ImageURL[0],
+              productTypes:[ products[index].Category1[0]],
+              price: {
+                currency: "ZAR",
+                value: products[index].Price[0]
+              },
+              availability: products[index].StockLevel[0]
+            
+            }
+          };
+          if (products[index].hasOwnProperty('OnSpecial')) {
+            params.product.salePrice = {
+              "value": products[index].SpecialPrice[0],
+              "currency": 'ZAR'
+            }
+            //console.log(index)
+          }
+          
+          entries.entries.push(params)
+        
+        }
+        res.json(entries)
+       // insertBatch(entries).catch(console.error)
 
+      });
 
+    })
 
 
 
