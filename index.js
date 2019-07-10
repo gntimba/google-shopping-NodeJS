@@ -1,35 +1,15 @@
 const express = require('express')
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const { google } = require('googleapis')
 const path = require('path');
-//const serviceAccountJwt = require('./Shopping API-145f77376c3c.json')
 const app = express()
 const axios = require('axios');
 var parseString = require('xml2js').parseString;
-const pro=require('../google-shopping/products.json')
 
-app.get('/', function (req, res) {
-  async function runSample() {
-    const client = await google.auth.getClient({
-      keyFile: path.join(__dirname, 'Shopping API-8bd0b5bf1bca.json'),
-      scopes: 'https://www.googleapis.com/auth/content',
-    });
+const interval=setInterval(function() {
+ startUloading()
+},120000)
 
-    const params = {
-      merchantId: 134645521
-    };
-    const content = google.content({ version: 'v2.1', auth: client });
-    const response = await content.products.list(params)
-    console.log(response.data);
-    res.json(response.data)
-
-    return response.data;
-  }
-
-  runSample().catch(console.error)
-})
-
-app.get('/csv', function (req, res) {
 
   function axiosTest() {
     console.log('geting data from the server')
@@ -51,22 +31,21 @@ app.get('/csv', function (req, res) {
  async function insertBatch(data){
     try {
       const client = await google.auth.getClient({
-        keyFile: path.join(__dirname, 'Shopping API-8bd0b5bf1bca.json'),
+        keyFile: path.join(__dirname, 'Shopping API-145f77376c3c.json'),
         scopes: 'https://www.googleapis.com/auth/content',
       });
       console.log("now inserting to google mecharnt")
       const content = google.content({ version: 'v2.1', auth: client });
       const response = await content.products.custombatch({"resource":data})
       //console.log(response.data);
-      res.json(response.data)
-      hrend = process.hrtime(hrstart)
-      console.info('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
+      console.log(response.status+' '+response.statusText);
       return response.data;
     } catch (error) {
       console.log(error)
     }
   
  }
+ function startUloading(){
  var hrstart = process.hrtime()
     
     axiosTest().then(data => {
@@ -78,7 +57,7 @@ app.get('/csv', function (req, res) {
 
         for (let index = 0; index < products.length; index++) {
           const params = {
-            merchantId: 120407712,
+            merchantId: 134645521,
             batchId: index + 1,
             method: "insert",
             product: {
@@ -96,7 +75,7 @@ app.get('/csv', function (req, res) {
                 currency: "ZAR",
                 value: products[index].Price[0]
               },
-              availability: products[index].StockLevel[0]
+              availability: "In Stock"
             
             }
           };
@@ -107,20 +86,38 @@ app.get('/csv', function (req, res) {
             }
             //console.log(index)
           }
-          
           entries.entries.push(params)
+          //availability: products[index].StockLevel[0]
         
         }
-        res.json(entries)
-       // insertBatch(entries).catch(console.error)
+       // res.json(entries)
+        insertBatch(entries).catch(console.error)
 
       });
 
     })
+  }
 
-
-
-})
+  app.get('/', function (req, res) {
+    async function runSample() {
+      const client = await google.auth.getClient({
+        keyFile: path.join(__dirname, 'Shopping API-8bd0b5bf1bca.json'),
+        scopes: 'https://www.googleapis.com/auth/content',
+      });
+  
+      const params = {
+        merchantId: 134645521
+      };
+      const content = google.content({ version: 'v2.1', auth: client });
+      const response = await content.products.list(params)
+      console.log(response.status+' '+response.statusText);
+     // res.json(response.data)
+  
+      return response.data;
+    }
+  
+    runSample().catch(console.error)
+  })
 
 
 app.get('/insert', function (req, res) {
