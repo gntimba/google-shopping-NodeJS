@@ -6,9 +6,9 @@ const app = express()
 const axios = require('axios');
 var parseString = require('xml2js').parseString;
 
-const interval=setInterval(function() {
+
  startUloading()
-},120000)
+
 
 
   function axiosTest() {
@@ -16,7 +16,7 @@ const interval=setInterval(function() {
     var options=
       {
         method: 'get',
-        url: 'http://www.buynow.co.za/Export.aspx?key=3',
+        url: 'https://www.buynow.co.za/Export.aspx?key=11',
         timeout: 180000, // Let's say you want to wait at least 180 seconds
       }
     
@@ -52,10 +52,11 @@ const interval=setInterval(function() {
       // res.send(data)
       console.log('done now passing data and converting it')
       parseString(data, function (err, result) {
-        let products = result.ROOT.Products;
+        let products =result.rss.channel[0].item
         let entries = { entries: [] }
 
         for (let index = 0; index < products.length; index++) {
+          let price = products[index]['g:price'][0].split(' ')
           const params = {
             merchantId: 134645521,
             batchId: index + 1,
@@ -63,31 +64,25 @@ const interval=setInterval(function() {
             product: {
               channel: "online",
               contentLanguage: "en",
-              offerId: products[index].ProductCode[0],
+              offerId: products[index]['g:id'][0],
               targetCountry: "ZA",
-              brand: products[index].Brand[0],
-              title: products[index].ProductName[0].replace(/<\/?[^>]+(>|$)/g, ""),
-              link: products[index].ProductURL[0],
-              description: products[index].ProductDescription[0].replace(/<\/?[^>]+(>|$)/g, ""),
-              imageLink: products[index].ImageURL[0],
-              productTypes:[ products[index].Category1[0]],
+              brand: products[index]['g:brand'][0],
+              title: products[index]['g:title'][0].replace(/<\/?[^>]+(>|$)/g, ""),
+              link: products[index]['g:link'][0],
+              description: products[index]['g:description'][0].replace(/<\/?[^>]+(>|$)/g, ""),
+              imageLink: products[index]['g:image_link'][0],
+              productTypes:[ products[index]['g:google_product_category'][0]],
               price: {
-                currency: "ZAR",
-                value: products[index].Price[0]
+                currency: price[1],
+                value: price[0]
               },
-              availability: "In Stock"
+              availability: products[index]['g:availability'][0],
+              condition:products[index]['g:condition'][0]
             
             }
           };
-          if (products[index].hasOwnProperty('OnSpecial')) {
-            params.product.salePrice = {
-              "value": products[index].SpecialPrice[0],
-              "currency": 'ZAR'
-            }
-            //console.log(index)
-          }
+  
           entries.entries.push(params)
-          //availability: products[index].StockLevel[0]
         
         }
        // res.json(entries)
